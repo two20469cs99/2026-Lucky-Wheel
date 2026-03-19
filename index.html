@@ -81,7 +81,7 @@
             Shuffle, Settings2, Users, Trash2, History, CheckSquare, Square, 
             Volume2, VolumeX, Palette, Music, Download, Dices, FileUp, Speaker, 
             ChevronDown, ChevronUp, Play, Pause, ListMusic, Plus, Repeat, Repeat1, 
-            Volume1, PlayCircle, PauseCircle, Maximize, Minimize, Menu, X, Trophy, Sparkles, Star, Gift, RotateCcw, GripVertical
+            Volume1, PlayCircle, PauseCircle, Maximize, Minimize, Menu, X, Trophy, Sparkles, Star, Gift, RotateCcw, GripVertical, FileText
         } from 'lucide-react';
         import confetti from 'canvas-confetti';
 
@@ -527,7 +527,8 @@
           };
 
           const downloadFile = (content, filename, type) => {
-            const blob = new Blob([content], { type: type });
+            // Add BOM for UTF-8 to ensure Excel displays Chinese characters correctly
+            const blob = new Blob(['\uFEFF', content], { type: type });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
@@ -552,8 +553,14 @@
 
           const handleExportPrizes = () => {
             if (prizes.length === 0) return;
-            const csvContent = prizes.map(p => `${p.name},${p.initialCount || p.count}`).join('\n');
+            const header = "獎項名稱,數量";
+            const csvContent = [header, ...prizes.map(p => `${p.name},${p.initialCount || p.count}`)].join('\n');
             downloadFile(csvContent, 'lucky_wheel_prizes.csv', 'text/csv;charset=utf-8');
+          };
+
+          const handleClearPrizes = () => {
+            console.log('Clearing prizes');
+            setPrizes([]);
           };
 
           const handleImportPrizes = (e) => {
@@ -564,7 +571,7 @@
             reader.onload = (event) => {
                 const text = event.target?.result;
                 if (typeof text === 'string') {
-                    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+                    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '' && !line.startsWith('獎項名稱'));
                     const newPrizes = lines.map((line, index) => {
                         const parts = line.split(',');
                         const name = parts[0]?.trim() || `獎項 ${index + 1}`;
@@ -584,6 +591,11 @@
             };
             reader.readAsText(file);
             if (prizeListInputRef.current) prizeListInputRef.current.value = '';
+          };
+          
+          const handleDownloadPrizeTemplate = () => {
+            const template = "獎項名稱,數量\n頭獎,1\n二獎,3\n三獎,5";
+            downloadFile(template, 'prize_template.csv', 'text/csv;charset=utf-8');
           };
 
           const handlePrizeDragStart = (e, index) => {
@@ -688,9 +700,11 @@
                     <div className="flex items-center justify-between">
                       <label className="flex items-center gap-2 font-bold text-sm opacity-90"><Gift size={16} className="text-yellow-500" />獎項設定</label>
                       <div className="flex items-center gap-1">
+                          <button onClick={handleDownloadPrizeTemplate} className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-blue-500" title="下載範例"><FileText size={16} /></button>
                           <input type="file" ref={prizeListInputRef} onChange={handleImportPrizes} accept=".txt,.csv" className="hidden" />
-                          <button onClick={() => prizeListInputRef.current?.click()} disabled={isSpinning} className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors disabled:opacity-30 text-current opacity-70" title="匯入獎項"><FileUp size={14} /></button>
-                          <button onClick={handleExportPrizes} disabled={prizes.length === 0} className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors disabled:opacity-30 text-current opacity-70" title="匯出獎項"><Download size={14} /></button>
+                          <button onClick={() => prizeListInputRef.current?.click()} disabled={isSpinning} className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors disabled:opacity-30 text-green-500" title="匯入獎項"><FileUp size={16} /></button>
+                          <button onClick={handleExportPrizes} disabled={prizes.length === 0} className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors disabled:opacity-30 text-amber-500" title="匯出獎項"><Download size={16} /></button>
+                          <button onClick={handleClearPrizes} disabled={prizes.length === 0} className="p-1.5 rounded-md hover:bg-black/10 dark:hover:bg-white/10 transition-colors disabled:opacity-30 text-red-500" title="全部清空"><Trash2 size={16} /></button>
                       </div>
                     </div>
                     <div className="flex gap-2">
