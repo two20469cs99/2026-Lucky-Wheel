@@ -1,5 +1,35 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+<script>
+  (function() {
+    // 1. 設定你允許的網域 (例如: yourname.github.io)
+    const allowedDomain = "two20469cs99.github.io"; 
+    
+    // 檢查目前網域
+    if (window.location.hostname !== allowedDomain && window.location.hostname !== "localhost") {
+      alert("非法盜用！此應用程式僅授權於 " + allowedDomain + " 運行。");
+      // 破壞畫面，讓盜用者無法使用
+      document.documentElement.innerHTML = "<div style='display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;'><h1>網頁授權錯誤，請聯繫原作者。</h1></div>";
+      window.stop(); // 停止載入後續資源
+    }
+
+    // 2. 基礎防護：禁用右鍵選單
+    document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // 3. 基礎防護：禁用開發者工具快捷鍵 (F12, Ctrl+Shift+I, Ctrl+U)
+    document.onkeydown = function(e) {
+      if (
+        e.keyCode === 123 || // F12
+        (e.ctrlKey && e.shiftKey && e.keyCode === 73) || // Ctrl+Shift+I
+        (e.ctrlKey && e.shiftKey && e.keyCode === 74) || // Ctrl+Shift+J
+        (e.ctrlKey && e.keyCode === 85) // Ctrl+U (檢視原始碼)
+      ) {
+        alert("為了安全考量，已停用開發者工具。");
+        return false;
+      }
+    };
+  })();
+</script>
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -23,16 +53,7 @@
   }
 }
 </script>
-<script>
-  // 禁用右鍵選單
-  document.oncontextmenu = function() { return false; };
-  // 禁用 F12, Ctrl+Shift+I 等開發者工具快捷鍵
-  document.onkeydown = function(e) {
-    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) {
-        return false;
-    }
-  };
-</script>
+
     <!-- 3. 載入 Babel (用於在瀏覽器內編譯 JSX) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
