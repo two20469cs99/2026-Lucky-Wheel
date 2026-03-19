@@ -23,7 +23,16 @@
   }
 }
 </script>
-
+<script>
+  // 禁用右鍵選單
+  document.oncontextmenu = function() { return false; };
+  // 禁用 F12, Ctrl+Shift+I 等開發者工具快捷鍵
+  document.onkeydown = function(e) {
+    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) {
+        return false;
+    }
+  };
+</script>
     <!-- 3. 載入 Babel (用於在瀏覽器內編譯 JSX) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
