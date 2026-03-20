@@ -589,7 +589,6 @@
           };
 
           const handleClearPrizes = () => {
-            console.log('Clearing prizes');
             setPrizes([]);
           };
 
@@ -1021,7 +1020,10 @@
           const handleShuffle = () => {
             const shuffled = [...names];
             for (let i = shuffled.length - 1; i > 0; i--) {
-              const j = Math.floor(Math.random() * (i + 1));
+              const randomBuffer = new Uint32Array(1);
+              window.crypto.getRandomValues(randomBuffer);
+              const cryptoRandom = randomBuffer[0] / (0xffffffff + 1);
+              const j = Math.floor(cryptoRandom * (i + 1));
               [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
             }
             setNames(shuffled);
@@ -1033,7 +1035,7 @@
             const files = e.target.files;
             if (files && files.length > 0) {
               const newTracks = Array.from(files).map((file) => ({
-                id: Math.random().toString(36).substr(2, 9),
+                id: window.crypto.randomUUID(),
                 name: file.name.replace(/\.[^/.]+$/, ""),
                 url: URL.createObjectURL(file)
               }));
@@ -1073,7 +1075,10 @@
             if (playlist.length === 0) return;
             const currentIndex = playlist.findIndex(t => t.id === currentTrackId);
             if (playbackMode === 'shuffle') {
-                let nextIndex = Math.floor(Math.random() * playlist.length);
+                const randomBuffer = new Uint32Array(1);
+                window.crypto.getRandomValues(randomBuffer);
+                const cryptoRandom = randomBuffer[0] / (0xffffffff + 1);
+                let nextIndex = Math.floor(cryptoRandom * playlist.length);
                 if (playlist.length > 1 && nextIndex === currentIndex) nextIndex = (nextIndex + 1) % playlist.length;
                 setCurrentTrackId(playlist[nextIndex].id);
             } else {
@@ -1128,7 +1133,12 @@
               return;
             }
             let actualDuration = spinDuration;
-            if (isRandomDuration) actualDuration = Math.random() * (maxDuration - minDuration) + minDuration;
+            if (isRandomDuration) {
+              const randomBuffer = new Uint32Array(1);
+              window.crypto.getRandomValues(randomBuffer);
+              const cryptoRandom = randomBuffer[0] / (0xffffffff + 1);
+              actualDuration = cryptoRandom * (maxDuration - minDuration) + minDuration;
+            }
             currentSpinDurationRef.current = actualDuration;
 
             setWinner(null);
@@ -1136,7 +1146,10 @@
             winnerRef.current = null; 
             soundManager.resumeContext();
             
-            const winnerIndex = Math.floor(Math.random() * names.length);
+            const randomBuffer = new Uint32Array(1);
+            window.crypto.getRandomValues(randomBuffer);
+            const cryptoRandom = randomBuffer[0] / (0xffffffff + 1);
+            const winnerIndex = Math.floor(cryptoRandom * names.length);
             const winnerName = names[winnerIndex];
             winnerRef.current = winnerName;
             setWinner(winnerName); 
@@ -1145,7 +1158,11 @@
             const winnerCenterAngle = (winnerIndex * segmentAngle) + (segmentAngle / 2);
             const halfSegment = segmentAngle / 2;
             const safeZone = halfSegment * 0.7; 
-            const randomOffset = (Math.random() * 2 - 1) * safeZone; 
+            
+            const offsetBuffer = new Uint32Array(1);
+            window.crypto.getRandomValues(offsetBuffer);
+            const cryptoOffsetRandom = offsetBuffer[0] / (0xffffffff + 1);
+            const randomOffset = (cryptoOffsetRandom * 2 - 1) * safeZone; 
             const targetBaseRotation = 270 - (winnerCenterAngle + randomOffset);
             const currentRot = rotation;
             const minSpins = 10;
